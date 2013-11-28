@@ -74,40 +74,43 @@ function render(time){
     }
   }
   if(keys_pressed[LEFT]) {
-    if(me.y<10.0 && me.dx>-0.1) me.dx = -0.1;
+    if(me.y<10.0 && me.dx>-0.2) me.dx += -0.03;
   }
   if(keys_pressed[RIGHT]) {
-    if(me.y<10.0 && me.dx<0.1) me.dx = 0.1;
+    if(me.y<10.0 && me.dx<0.2) me.dx += 0.03;
   }
   
   if(me.y>0.0) {
     me.dy -= 0.0005*dt;
   }
   if(me.y<10.0) {
-    me.dx -= (me.dx>0 ? 0.0001 : -0.0001)*dt;
+    if(me.dx<0.005 && me.dx>-0.005) { //slow to zero in x-direction
+      me.dx = 0.0;
+    }
+    else { //apply friction
+      me.dx -= (me.dx>0 ? 0.0005 : -0.0005)*dt;
+    }
   }
-  me.x += me.dx*dt;
+  me.x += me.dx*dt; //integrate
   me.y += me.dy*dt;
-  if(me.y<0.0) {
+  if(me.y<0.0) { //bounce off ground
     me.y = 0.0;
     if(me.dy<0.0) me.dy *= -0.4;
   }
-  if(me.x<0.0) {
+  if(me.x<0.0) { //bounce off left wall
     me.x = 0.0;
     if(me.dx<0.0) me.dx *= -0.8;
   }
-  if(me.x>window.innerWidth-me.offsetWidth) {
-    //console.log(me.x,window.innerWidth,me.offsetWidth);
+  if(me.x>window.innerWidth-me.offsetWidth) { //bounce off right wall
     me.x = window.innerWidth-me.offsetWidth;
     if(me.dx>0.0) me.dx *= -0.8;
   }
-  if(me.y<2.0 && me.dy<0.005 && me.dy>-0.005) {
+  if(me.y<2.0 && me.dy<0.005 && me.dy>-0.005) { //stop bounce in y-direction
     me.y = 0.0
     me.dy = 0.0;
   }
-  me.style.left = (me.x+0.5|0)+'px';
+  me.style.left = (me.x+0.5|0)+'px'; //update screen image
   me.style.bottom = (me.y+0.5|0)+'px';
-  //console.log(me.y, me.dy, dt);
   requestAnimationFrame(render);
 }
 requestAnimationFrame(render);
