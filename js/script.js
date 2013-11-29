@@ -137,6 +137,20 @@ function render(time){
     }
   }
   
+  //LJ repulsion
+  var mx = me.x>>S_shift;
+  var my = me.y>>S_shift;
+  for(var x=Math.max(mx-1,0); x<Math.min(mx+1,100); x++) {
+    for(var y=Math.max(my-1,0); y<Math.min(my+1,100); y++) {
+      if(map[x][y]!=EMPTY) {
+        var rx = me.x - x*S;
+        var ry = me.y - y*S;
+        me.dx += dt*0.0001*rx/(rx*rx+ry*ry)*(rx*rx+ry*ry);
+        me.dy += dt*0.0001*ry/(rx*rx+ry*ry)*(rx*rx+ry*ry);
+      }
+    }
+  }
+  
   var new_x = me.x + me.dx*dt;
   var new_y = me.y + me.dy*dt;
   
@@ -158,62 +172,8 @@ function render(time){
     if(me.dx>0.0) me.dx *= -0.8;
   }
   
-  var new_x = me.x + me.dx*dt;
-  var new_y = me.y + me.dy*dt;
-  
-  var x = me.x; var y = me.y;
-  var x_interval = me.dx/Math.sqrt(me.dx*me.dx + me.dy*me.dy);
-  var y_interval = me.dy/Math.sqrt(me.dx*me.dx + me.dy*me.dy);
-  if(me.dx!=0.0 || me.dy!=0.0)
-  while((x-new_x)*me.dx<0.0 || (y-new_y)*me.dy<0.0) {
-    if(map[x>>S_shift][y>>S_shift]!=EMPTY ||
-       map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
-       map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
-       map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
-      //new_x = x==me.x ? x : x - x_interval;
-      //new_y = y==me.y ? y : y - y_interval;
-      /*while(map[x>>S_shift][y>>S_shift]!=EMPTY ||
-            map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
-            map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
-            map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
-        x -= x_interval;
-        y -= y_interval;
-      }*/
-      while(map[x>>S_shift][y>>S_shift]!=EMPTY ||
-            map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
-            map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
-            map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
-        y += 0.1;
-      }
-      new_x = x;
-      new_y = y;
-      console.log(new_x,new_y);
-      me.dx = 0.0; me.dy = 0.0;
-      /*x -= x_interval;
-      if(x_interval!=0.0 && !(map[x>>S_shift][y>>S_shift]!=EMPTY ||
-         map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
-         map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
-         map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY)) {
-        me.dx *= ground_bounce;
-        if(Math.abs(me.dx)<0.05) me.dx = 0.0;
-      }
-      x += x_interval;
-      y -= y_interval;
-      if(y_interval!=0.0 && !(map[x>>S_shift][y>>S_shift]!=EMPTY ||
-         map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
-         map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
-         map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY)) {
-        me.dy *= ground_bounce;
-        if(Math.abs(me.dy)<0.05) me.dy = 0.0;
-      }*/
-      break;
-    }
-    x += x_interval;
-    y += y_interval;
-  }
-  
-  me.x = new_x;
-  me.y = new_y;
+  me.x = me.x + me.dx*dt;
+  me.y = me.y + me.dy*dt;
   
   me.style.left = (me.x+0.5|0)+'px'; //update screen image
   me.style.bottom = (me.y+0.5|0)+'px';
