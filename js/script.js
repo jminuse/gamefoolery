@@ -46,8 +46,10 @@ for(var x=0; x<window.innerWidth>>S_shift; x++) {
   }
 }
 
-for(var i=0; i<3; i++) {
-  var mx = 10+i*15; var my = 3;
+SW = window.innerWidth>>S_shift;
+SH = window.innerHeight>>S_shift;
+var mx = (Math.random()*window.innerWidth)>>S_shift; var my = 0;
+for(var i=0; i<30; i++) {
   var block = document.createElement('div');
   block.style.position = 'absolute';
   block.style.left = (mx*S)+'px';
@@ -61,6 +63,10 @@ for(var i=0; i<3; i++) {
       map[x][y] = WALL;
     }
   }
+  mx += (10 - Math.random()*20 + 0.5)|0;
+  my += (8 - Math.random()*4 + 0.5)|0;
+  if(mx<0) x=0;  if(my<0) my=0;
+  if(mx>SW-10) mx=SW-10;  if(my>SH-5) mx=SH-5;
 }
 
 UP = 38; DOWN = 40; LEFT = 37; RIGHT = 39;
@@ -137,6 +143,13 @@ function render(time){
     }
   }
   
+  if(Math.abs(me.dx*dt)>S) {//speed limit, for collision testing
+    me.dx = me.dx>0.0 ? S/dt : -S/dt;
+  }
+  if(Math.abs(me.dy*dt)>S) {//speed limit, for collision testing
+    me.dy = me.dy>0.0 ? S/dt : -S/dt;
+  }
+  
   var new_x = me.x + me.dx*dt;
   var new_y = me.y + me.dy*dt;
   
@@ -158,18 +171,20 @@ function render(time){
     if(me.dx>0.0) me.dx *= -0.8;
   }
   
-  var new_x = me.x + me.dx*dt;
-  var new_y = me.y + me.dy*dt;
-  
-  if(near_standing && me.dy<0.0) { //bounce off platform
-    //map[me.x>>S_shift][(me.y-5.0)>>S_shift]
-    me.y = (me.y>>S_shift)*S;
-    if(me.dy<0.0) me.dy *= ground_bounce;
+  if(near_standing && me.dy<0.0) { //bounce off platform from above
+    me.dy *= ground_bounce;
     if(Math.abs(me.dy)<0.05) me.dy = 0.0;
   }
+  if(map[me.x>>S_shift][(me.y+10.0)>>S_shift]!=EMPTY && me.dy>0.0) { //bounce off platform from below
+    me.dy *= ground_bounce;
+  }
+  if((map[(me.x+15.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx>0.0) ||
+     (map[(me.x-5.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx<0.0)) { //bounce off platform from sides
+    me.dx *= ground_bounce;
+  }
   
-  me.x = new_x;
-  me.y = new_y;
+  me.x += me.dx*dt;
+  me.y += me.dy*dt;
   
   me.style.left = (me.x+0.5|0)+'px'; //update screen image
   me.style.bottom = (me.y+0.5|0)+'px';
