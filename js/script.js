@@ -137,20 +137,6 @@ function render(time){
     }
   }
   
-  //LJ repulsion
-  var mx = me.x>>S_shift;
-  var my = me.y>>S_shift;
-  for(var x=Math.max(mx-1,0); x<Math.min(mx+1,100); x++) {
-    for(var y=Math.max(my-1,0); y<Math.min(my+1,100); y++) {
-      if(map[x][y]!=EMPTY) {
-        var rx = me.x - x*S;
-        var ry = me.y - y*S;
-        me.dx += dt*0.0001*rx/(rx*rx+ry*ry)*(rx*rx+ry*ry);
-        me.dy += dt*0.0001*ry/(rx*rx+ry*ry)*(rx*rx+ry*ry);
-      }
-    }
-  }
-  
   var new_x = me.x + me.dx*dt;
   var new_y = me.y + me.dy*dt;
   
@@ -172,8 +158,18 @@ function render(time){
     if(me.dx>0.0) me.dx *= -0.8;
   }
   
-  me.x = me.x + me.dx*dt;
-  me.y = me.y + me.dy*dt;
+  var new_x = me.x + me.dx*dt;
+  var new_y = me.y + me.dy*dt;
+  
+  if(near_standing && me.dy<0.0) { //bounce off platform
+    //map[me.x>>S_shift][(me.y-5.0)>>S_shift]
+    me.y = (me.y>>S_shift)*S;
+    if(me.dy<0.0) me.dy *= ground_bounce;
+    if(Math.abs(me.dy)<0.05) me.dy = 0.0;
+  }
+  
+  me.x = new_x;
+  me.y = new_y;
   
   me.style.left = (me.x+0.5|0)+'px'; //update screen image
   me.style.bottom = (me.y+0.5|0)+'px';
