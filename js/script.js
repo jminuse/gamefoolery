@@ -89,7 +89,7 @@ function render(time){
   }
   old_time = time;
   
-  var standing = me.y<0.1 || (map[me.x>>S_shift][(me.y-0.1)>>S_shift]!=EMPTY);
+  var standing = me.y<0.5 || (map[me.x>>S_shift][(me.y-0.5)>>S_shift]!=EMPTY);
   var near_standing = me.y<5.0 || (map[me.x>>S_shift][(me.y-5.0)>>S_shift]!=EMPTY);
   
   if(keys_pressed[UP]) {
@@ -97,7 +97,7 @@ function render(time){
       me.dy = 0.3;
     }
     if(!near_standing && me.dx<0.2) { //fall slower
-      me.dy += 0.0002*dt;
+      //me.dy += 0.0002*dt;
     }
   }
   if(keys_pressed[DOWN]) {
@@ -125,16 +125,15 @@ function render(time){
   if(keys_pressed[SPACE]) {
     console.log(me.x,me.y);
   }
-  
   if(!standing) { //gravity
     me.dy -= 0.001*dt;
   }
   if(near_standing) {
-    if(me.dx<0.005 && me.dx>-0.005) { //zero out x-velocity
+    if(Math.abs(me.dx) < 0.002*dt) { //zero out x-velocity
       me.dx = 0.0;
     }
     else { //apply friction
-      me.dx -= (me.dx>0.0 ? 0.001 : -0.001)*dt;
+      me.dx -= (me.dx>0.0 ? 0.002 : -0.002)*dt;
     }
   }
   
@@ -144,6 +143,7 @@ function render(time){
   if(new_y<0.0) { //bounce off ground
     me.y = 0.0;
     if(me.dy<0.0) me.dy *= ground_bounce;
+    if(Math.abs(me.dy)<0.05) me.dy = 0.0;
   }
   if(new_y>window.innerHeight-me.offsetHeight) { //bounce off ceiling
     me.y = window.innerHeight-me.offsetHeight;
@@ -162,17 +162,54 @@ function render(time){
   var new_y = me.y + me.dy*dt;
   
   var x = me.x; var y = me.y;
+  var x_interval = me.dx/Math.sqrt(me.dx*me.dx + me.dy*me.dy);
+  var y_interval = me.dy/Math.sqrt(me.dx*me.dx + me.dy*me.dy);
+  if(me.dx!=0.0 || me.dy!=0.0)
   while((x-new_x)*me.dx<0.0 || (y-new_y)*me.dy<0.0) {
-    if(map[x>>S_shift][y>>S_shift]!=EMPTY) {
-      new_x = x==me.x ? x : x-me.dx*0.1;
-      new_y = y==me.y ? y : y-me.dy*0.1;
-      if(map[(x-me.dx*0.1)>>S_shift][y>>S_shift]==EMPTY) me.dx *= ground_bounce;
-      if(map[x>>S_shift][(y-me.dy*0.1)>>S_shift]==EMPTY) me.dy *= ground_bounce;
-      //console.log(':',new_x,new_y);
+    if(map[x>>S_shift][y>>S_shift]!=EMPTY ||
+       map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
+       map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
+       map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
+      //new_x = x==me.x ? x : x - x_interval;
+      //new_y = y==me.y ? y : y - y_interval;
+      /*while(map[x>>S_shift][y>>S_shift]!=EMPTY ||
+            map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
+            map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
+            map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
+        x -= x_interval;
+        y -= y_interval;
+      }*/
+      while(map[x>>S_shift][y>>S_shift]!=EMPTY ||
+            map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
+            map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
+            map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY) {
+        y += 0.1;
+      }
+      new_x = x;
+      new_y = y;
+      console.log(new_x,new_y);
+      me.dx = 0.0; me.dy = 0.0;
+      /*x -= x_interval;
+      if(x_interval!=0.0 && !(map[x>>S_shift][y>>S_shift]!=EMPTY ||
+         map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
+         map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
+         map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY)) {
+        me.dx *= ground_bounce;
+        if(Math.abs(me.dx)<0.05) me.dx = 0.0;
+      }
+      x += x_interval;
+      y -= y_interval;
+      if(y_interval!=0.0 && !(map[x>>S_shift][y>>S_shift]!=EMPTY ||
+         map[(x+me.offsetWidth)>>S_shift][y>>S_shift]!=EMPTY ||
+         map[x>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY ||
+         map[(x+me.offsetWidth)>>S_shift][(y+me.offsetHeight)>>S_shift]!=EMPTY)) {
+        me.dy *= ground_bounce;
+        if(Math.abs(me.dy)<0.05) me.dy = 0.0;
+      }*/
       break;
     }
-    x+=me.dx*0.1;
-    y+=me.dy*0.1;
+    x += x_interval;
+    y += y_interval;
   }
   
   me.x = new_x;
