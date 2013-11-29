@@ -48,13 +48,19 @@ for(var x=0; x<window.innerWidth>>S_shift; x++) {
 
 SW = window.innerWidth>>S_shift;
 SH = window.innerHeight>>S_shift;
-var mx = (Math.random()*window.innerWidth)>>S_shift; var my = 0;
-for(var i=0; i<30; i++) {
+
+var request=new XMLHttpRequest();
+request.open("GET","js/script.js",false);
+request.send(null);
+var code_lines = request.responseText.split('\n');
+for(var i=0; i<100; i++) {
+  var mx = Math.random()*(SW-20)|0;
+  var my = Math.random()*(SH-5)|0;
   var block = document.createElement('div');
   block.style.position = 'absolute';
   block.style.left = (mx*S)+'px';
   block.style.bottom = (my*S)+'px';
-  block.innerHTML = 'hello,world!';
+  block.innerHTML = code_lines[i].slice(0,20);
   document.body.appendChild(block);
   var mw = block.offsetWidth>>S_shift;
   var mh = block.offsetHeight>>S_shift;
@@ -63,10 +69,10 @@ for(var i=0; i<30; i++) {
       map[x][y] = WALL;
     }
   }
-  mx += (10 - Math.random()*20 + 0.5)|0;
-  my += (8 - Math.random()*4 + 0.5)|0;
+  /*mx += (10 - Math.random()*20 + 0.5)|0;
+  my += (1 - Math.random()*5 + 0.5)|0;
   if(mx<0) x=0;  if(my<0) my=0;
-  if(mx>SW-10) mx=SW-10;  if(my>SH-5) mx=SH-5;
+  if(mx>SW-20) mx=SW-20;  if(my>SH-5) mx=SH-5;*/
 }
 
 UP = 38; DOWN = 40; LEFT = 37; RIGHT = 39;
@@ -178,8 +184,8 @@ function render(time){
   if(map[me.x>>S_shift][(me.y+10.0)>>S_shift]!=EMPTY && me.dy>0.0) { //bounce off platform from below
     me.dy *= ground_bounce;
   }
-  if((map[(me.x+15.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx>0.0) ||
-     (map[(me.x-5.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx<0.0)) { //bounce off platform from sides
+  if((me.x+15.0<window.innerWidth-S && map[(me.x+15.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx>0.0) ||
+     (me.x-5.0>0.0 && map[(me.x-5.0)>>S_shift][me.y>>S_shift]!=EMPTY && me.dx<0.0)) { //bounce off platform from sides
     me.dx *= ground_bounce;
   }
   
